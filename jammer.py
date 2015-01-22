@@ -1,6 +1,7 @@
 import struct
 import socket
 import random
+import logging
 
 
 class FakeSwitch(object):
@@ -8,6 +9,8 @@ class FakeSwitch(object):
     HEADER_SIZE = struct.calcsize(HEADER_FORMAT)
 
     OF_HELLO = 0
+    OF_FEATUERS_REQUEST = 5
+    OF_FEATURES_REPLY = 6
 
     def __init__(self, controller, port=6633, dpid=None):
         if dpid:
@@ -21,7 +24,7 @@ class FakeSwitch(object):
         self.send_hello()
         self.recv_loop()
 
-    def send_packet(self, of_type, payload):
+    def send_packet(self, of_type, tid=0, payload=''):
         version = 1
         tid = 0
 
@@ -38,7 +41,27 @@ class FakeSwitch(object):
                 self.HEADER_FORMAT, header)
             payload = self.sock.recv(length - self.HEADER_SIZE)
 
-            # TODO: do something
+            if type_ == self.OF_HELLO:
+                pass
+            elif type_ == self.OF_FEATUERS_REQUEST:
+                self.send_features_reply(tid, payload)
+            else:
+                logging.warning('Unknown type: {0}'.format(type_))
 
     def send_hello(self):
         self.send_packet(self.OF_HELLO, '')
+
+    def send_features_reply(self, tid, params):
+        payload_format = '!QIBxxxII'
+
+        buffer_size = 255
+        number_of_tables = 0
+        sw_capablity_flags = 0x00000000
+        action_capablity_flags = 0x00000000
+
+        payload = struct.pack(
+            payload_format,
+            self.dpid, buffer_size, number_of_tables,
+            sw_capablity_flags, action_capablity_flags)
+
+        self.send_packet(self.OF_FEATURES_REPLY, tid, payload)
