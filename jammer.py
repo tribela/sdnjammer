@@ -9,6 +9,8 @@ class FakeSwitch(object):
     HEADER_SIZE = struct.calcsize(HEADER_FORMAT)
 
     OF_HELLO = 0
+    OF_ECHO_REQUEST = 2
+    OF_ECHO_REPLY = 3
     OF_FEATUERS_REQUEST = 5
     OF_FEATURES_REPLY = 6
 
@@ -46,7 +48,9 @@ class FakeSwitch(object):
         payload = self.sock.recv(length - self.HEADER_SIZE)
 
         if type_ == self.OF_HELLO:
-            pass
+            logging.debug('HELLO!')
+        elif type_ == self.OF_ECHO_REPLY:
+            logging.debug('Echo reply: {0}'.format(payload))
         elif type_ == self.OF_FEATUERS_REQUEST:
             self.send_features_reply(tid, payload)
         else:
@@ -56,6 +60,9 @@ class FakeSwitch(object):
 
     def send_hello(self):
         self.send_packet(self.OF_HELLO, '')
+
+    def send_echo_request(self, data):
+        self.send_packet(self.OF_ECHO_REQUEST, payload=data)
 
     def send_features_reply(self, tid, params):
         payload_format = '!QIBxxxII'
