@@ -45,7 +45,12 @@ class FakeSwitch(object):
         header = self.sock.recv(self.HEADER_SIZE)
         version, type_, length, tid = struct.unpack(
             self.HEADER_FORMAT, header)
-        payload = self.sock.recv(length - self.HEADER_SIZE)
+
+        more_bytes = length - self.HEADER_SIZE
+        if more_bytes:
+            payload = self.sock.recv(more_bytes)
+        else:
+            payload = ''
 
         if type_ == self.OF_HELLO:
             logging.debug('HELLO!')
