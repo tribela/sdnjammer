@@ -83,3 +83,11 @@ class FakeSwitch(object):
             sw_capablity_flags, action_capablity_flags)
 
         self.send_packet(self.OF_FEATURES_REPLY, tid, payload)
+
+
+def by_connection_reset(host, port, count):
+    for i in xrange(count):
+        dpid = i + 1
+        sw = FakeSwitch(host, port, dpid=dpid)
+        sw.send_hello()
+        sw.send_features_reply(0, '')
