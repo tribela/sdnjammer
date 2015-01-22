@@ -50,7 +50,9 @@ class FakeSwitch(object):
         elif type_ == self.OF_FEATUERS_REQUEST:
             self.send_features_reply(tid, payload)
         else:
-            logging.warning('Unknown type: {0}'.format(type_))
+            logging.warning('Unknown type: {0}, payload: {1}'.format(
+                type_, payload.encode('hex')))
+
 
     def send_hello(self):
         self.send_packet(self.OF_HELLO, '')
