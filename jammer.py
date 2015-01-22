@@ -1,7 +1,7 @@
-import struct
-import socket
-import random
 import logging
+import random
+import socket
+import struct
 
 
 class FakeSwitch(object):
