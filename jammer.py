@@ -21,9 +21,6 @@ class FakeSwitch(object):
         self.sock = socket.socket()
         self.sock.connect((controller, port))
 
-        self.send_hello()
-        self.recv_loop()
-
     def send_packet(self, of_type, tid=0, payload=''):
         version = 1
         tid = 0
@@ -34,19 +31,23 @@ class FakeSwitch(object):
 
         self.sock.send(message)
 
-    def recv_loop(self):
+    def start(self):
+        self.send_hello()
         while 1:
-            header = self.sock.recv(self.HEADER_SIZE)
-            version, type_, length, tid = struct.unpack(
-                self.HEADER_FORMAT, header)
-            payload = self.sock.recv(length - self.HEADER_SIZE)
+            self.proc_step()
 
-            if type_ == self.OF_HELLO:
-                pass
-            elif type_ == self.OF_FEATUERS_REQUEST:
-                self.send_features_reply(tid, payload)
-            else:
-                logging.warning('Unknown type: {0}'.format(type_))
+    def proc_step(self):
+        header = self.sock.recv(self.HEADER_SIZE)
+        version, type_, length, tid = struct.unpack(
+            self.HEADER_FORMAT, header)
+        payload = self.sock.recv(length - self.HEADER_SIZE)
+
+        if type_ == self.OF_HELLO:
+            pass
+        elif type_ == self.OF_FEATUERS_REQUEST:
+            self.send_features_reply(tid, payload)
+        else:
+            logging.warning('Unknown type: {0}'.format(type_))
 
     def send_hello(self):
         self.send_packet(self.OF_HELLO, '')
