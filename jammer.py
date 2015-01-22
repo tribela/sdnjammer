@@ -36,6 +36,9 @@ class FakeSwitch(object):
         while 1:
             self.proc_step()
 
+    def close(self):
+        self.sock.close()
+
     def proc_step(self):
         header = self.sock.recv(self.HEADER_SIZE)
         version, type_, length, tid = struct.unpack(
