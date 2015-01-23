@@ -91,3 +91,17 @@ def by_connection_reset(host, port, count):
         sw = FakeSwitch(host, port, dpid=dpid)
         sw.send_hello()
         sw.send_features_reply(0, '')
+
+
+def by_duplicated_dpid(host, port, count):
+    switches = []
+    for i in range(count):
+        dpid = i + 1
+        sw = FakeSwitch(host, port, dpid=dpid)
+        sw.send_hello()
+        sw.proc_step()
+        sw.proc_step()
+        switches.append(sw)
+
+    for sw in switches:
+        sw.close()
