@@ -18,7 +18,7 @@ class FakeSwitch(object):
         if dpid:
             self.dpid = dpid
         else:
-            self.dpid = random.randrange(1<<64)
+            self.dpid = random.randrange(1 << 64)
 
         self.sock = socket.socket()
         self.sock.connect((controller, port))
@@ -28,7 +28,8 @@ class FakeSwitch(object):
         tid = 0
 
         length = self.HEADER_SIZE + len(payload)
-        message = struct.pack(self.HEADER_FORMAT, version, of_type, length, tid)
+        message = struct.pack(self.HEADER_FORMAT,
+                              version, of_type, length, tid)
         message += payload
 
         self.sock.send(message)
@@ -61,7 +62,6 @@ class FakeSwitch(object):
         else:
             logging.warning('Unknown type: {0}, payload: {1}'.format(
                 type_, payload.encode('hex')))
-
 
     def send_hello(self):
         self.send_packet(self.OF_HELLO)
