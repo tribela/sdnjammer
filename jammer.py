@@ -23,22 +23,24 @@ class FakeSwitch(object):
         self.controller = controller
         self.port = port
 
+        self.connected = False
         self.registered = False
 
     def connect(self):
-        self.sock = socket.socket()
-        self.sock.connect((self.controller, self.port))
+        if not self.connected:
+            self.sock = socket.socket()
+            self.sock.connect((self.controller, self.port))
 
     def close(self):
         self.sock.close()
 
     def start(self):
-        self.conenct()
         self.register()
         while 1:
             self.proc_step()
 
     def register(self):
+        self.connect()
         self.send_hello()
         while not self.registered:
             self.proc_step()
