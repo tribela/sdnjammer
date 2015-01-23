@@ -20,8 +20,28 @@ class FakeSwitch(object):
         else:
             self.dpid = random.randrange(1 << 64)
 
+        self.controller = controller
+        self.port = port
+
+        self.registered = False
+
+    def connect(self):
         self.sock = socket.socket()
-        self.sock.connect((controller, port))
+        self.sock.connect((self.controller, self.port))
+
+    def close(self):
+        self.sock.close()
+
+    def start(self):
+        self.conenct()
+        self.register()
+        while 1:
+            self.proc_step()
+
+    def register(self):
+        self.send_hello()
+        while not self.registered:
+            self.proc_step()
 
     def send_packet(self, of_type, tid=0, payload=''):
         version = 1
@@ -33,14 +53,6 @@ class FakeSwitch(object):
         message += payload
 
         self.sock.send(message)
-
-    def start(self):
-        self.send_hello()
-        while 1:
-            self.proc_step()
-
-    def close(self):
-        self.sock.close()
 
     def proc_step(self):
         header = self.sock.recv(self.HEADER_SIZE)
@@ -83,12 +95,14 @@ class FakeSwitch(object):
             sw_capablity_flags, action_capablity_flags)
 
         self.send_packet(self.OF_FEATURES_REPLY, tid, payload)
+        self.registered = True
 
 
 def by_connection_reset(host, port, count):
     for i in xrange(count):
         dpid = i + 1
         sw = FakeSwitch(host, port, dpid=dpid)
+        sw.connect()
         sw.send_hello()
         sw.send_features_reply(0, '')
 
@@ -98,9 +112,8 @@ def by_duplicated_dpid(host, port, count):
     for i in range(count):
         dpid = i + 1
         sw = FakeSwitch(host, port, dpid=dpid)
-        sw.send_hello()
-        sw.proc_step()
-        sw.proc_step()
+        sw.connect()
+        sw.register()
         switches.append(sw)
 
     for sw in switches:
