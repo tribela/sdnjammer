@@ -88,8 +88,8 @@ class FakeSwitch(object):
 
         buffer_size = 255
         number_of_tables = 0
-        sw_capablity_flags = 0x00000000
-        action_capablity_flags = 0x00000000
+        sw_capablity_flags = 0x000000c7
+        action_capablity_flags = 0x00000fff
 
         payload = struct.pack(
             payload_format,
