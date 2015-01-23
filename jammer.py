@@ -64,7 +64,7 @@ class FakeSwitch(object):
 
 
     def send_hello(self):
-        self.send_packet(self.OF_HELLO, '')
+        self.send_packet(self.OF_HELLO)
 
     def send_echo_request(self, data):
         self.send_packet(self.OF_ECHO_REQUEST, payload=data)
