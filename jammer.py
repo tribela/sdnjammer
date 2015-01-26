@@ -15,6 +15,7 @@ class FakeSwitch(object):
     OF_FEATURES_REPLY = 6
     OF_GET_CONFIG_REQUEST = 7
     OF_GET_CONFIG_REPLY = 8
+    OF_SET_CONFIG = 9
     OF_STATS_REQUEST = 16
     OF_STATS_REPLY = 17
 
@@ -29,6 +30,11 @@ class FakeSwitch(object):
 
         self.connected = False
         self.registered = False
+
+        self.config = {
+            'flags': 0x00000000,
+            'miss_send_len': 128,
+        }
 
     def connect(self):
         if not self.connected:
@@ -81,6 +87,9 @@ class FakeSwitch(object):
         elif type_ == self.OF_GET_CONFIG_REQUEST:
             logging.debug('Config request')
             self.send_get_config_reply(tid, payload)
+        elif type_ == self.OF_SET_CONFIG:
+            logging.debug('Setting config')
+            self.set_config(payload)
         elif type_ == self.OF_STATS_REQUEST:
             logging.debug('Stats request')
             self.send_stats_reply(tid, payload)
@@ -112,11 +121,16 @@ class FakeSwitch(object):
     def send_get_config_reply(self, tid, payload):
         payload_format = '!HH'
 
-        flags = 0x00000000
-        miss_send_len = 128
+        flags = self.config['flags']
+        miss_send_len = self.config['miss_send_len']
 
         payload = struct.pack(payload_format, flags, miss_send_len)
         self.send_packet(self.OF_GET_CONFIG_REPLY, tid, payload)
+
+    def set_config(self, params):
+        flags, miss_send_len = struct.unpack('!HH', params)
+        self.config['flags'] = flags
+        self.config['miss_send_len'] = miss_send_len
 
     def send_stats_reply(self, tid, payload):
         payload_format = '!HH256s256s256s32s256s'
