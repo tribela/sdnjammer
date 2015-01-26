@@ -13,6 +13,10 @@ class FakeSwitch(object):
     OF_ECHO_REPLY = 3
     OF_FEATUERS_REQUEST = 5
     OF_FEATURES_REPLY = 6
+    OF_GET_CONFIG_REQUEST = 7
+    OF_GET_CONFIG_REPLY = 8
+    OF_STATS_REQUEST = 16
+    OF_STATS_REPLY = 17
 
     def __init__(self, controller, port=6633, dpid=None):
         if dpid:
@@ -72,7 +76,14 @@ class FakeSwitch(object):
         elif type_ == self.OF_ECHO_REPLY:
             logging.debug('Echo reply: {0}'.format(payload))
         elif type_ == self.OF_FEATUERS_REQUEST:
+            logging.debug('Feature request')
             self.send_features_reply(tid, payload)
+        elif type_ == self.OF_GET_CONFIG_REQUEST:
+            logging.debug('Config request')
+            self.send_get_config_reply(tid, payload)
+        elif type_ == self.OF_STATS_REQUEST:
+            logging.debug('Stats request')
+            self.send_stats_reply(tid, payload)
         else:
             logging.warning('Unknown type: {0}, payload: {1}'.format(
                 type_, payload.encode('hex')))
@@ -97,6 +108,32 @@ class FakeSwitch(object):
             sw_capablity_flags, action_capablity_flags)
 
         self.send_packet(self.OF_FEATURES_REPLY, tid, payload)
+
+    def send_get_config_reply(self, tid, payload):
+        payload_format = '!HH'
+
+        flags = 0x00000000
+        miss_send_len = 128
+
+        payload = struct.pack(payload_format, flags, miss_send_len)
+        self.send_packet(self.OF_GET_CONFIG_REPLY, tid, payload)
+
+    def send_stats_reply(self, tid, payload):
+        payload_format = '!HH256s256s256s32s256s'
+
+        stats_type = 0
+        flags = 0x00000000
+        mfr_desc = 'SDN Jammer'
+        hw_desc = 'FakeSwitch'
+        sw_desc = '0.0.0'
+        serial_num = 'None'
+        dp_desc = 'None'
+
+        payload = struct.pack(
+            payload_format, stats_type, flags,
+            mfr_desc, hw_desc, sw_desc, serial_num, dp_desc)
+
+        self.send_packet(self.OF_STATS_REPLY, tid, payload)
         self.registered = True
 
 
