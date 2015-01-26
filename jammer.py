@@ -72,12 +72,16 @@ class FakeSwitch(object):
 
     def proc_step(self):
         header = self.sock.recv(self.HEADER_SIZE)
+        while len(header) < self.HEADER_SIZE:
+            header += self.sock.recv(self.HEADER_SIZE - len(header))
         version, type_, length, tid = struct.unpack(
             self.HEADER_FORMAT, header)
 
         more_bytes = length - self.HEADER_SIZE
         if more_bytes:
             payload = self.sock.recv(more_bytes)
+            while len(payload) < more_bytes:
+                payload += self.sock.recv(more_bytes - len(payload))
         else:
             payload = ''
 
