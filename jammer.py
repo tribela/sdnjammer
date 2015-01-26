@@ -45,6 +45,8 @@ class FakeSwitch(object):
 
     def close(self):
         self.sock.close()
+        self.connected = False
+        self.registered = False
 
     def start(self):
         self.register()
