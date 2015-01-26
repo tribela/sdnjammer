@@ -18,6 +18,8 @@ class FakeSwitch(object):
     OF_SET_CONFIG = 9
     OF_STATS_REQUEST = 16
     OF_STATS_REPLY = 17
+    OF_BARRIER_REQUEST = 18
+    OF_BARRIER_REPLY = 19
 
     def __init__(self, controller, port=6633, dpid=None):
         if dpid:
@@ -93,6 +95,8 @@ class FakeSwitch(object):
         elif type_ == self.OF_STATS_REQUEST:
             logging.debug('Stats request')
             self.send_stats_reply(tid, payload)
+        elif type_ == self.OF_BARRIER_REQUEST:
+            self.send_barrier_reply(tid, payload)
         else:
             logging.warning('Unknown type: {0}, payload: {1}'.format(
                 type_, payload.encode('hex')))
@@ -149,6 +153,9 @@ class FakeSwitch(object):
 
         self.send_packet(self.OF_STATS_REPLY, tid, payload)
         self.registered = True
+
+    def send_barrier_reply(self, tid, payload):
+        self.send_packet(self.OF_BARRIER_REPLY, tid, '')
 
 
 def by_connection_reset(host, port, count):
