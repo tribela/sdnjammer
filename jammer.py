@@ -104,6 +104,7 @@ class FakeSwitch(object):
             logging.debug('Stats request')
             self.send_stats_reply(tid, payload)
         elif type_ == self.OF_BARRIER_REQUEST:
+            logging.debug('Barrier request')
             self.send_barrier_reply(tid, payload)
         else:
             logging.warning('Unknown type: {0}, payload: {1}'.format(
