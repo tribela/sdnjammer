@@ -2,6 +2,8 @@ import logging
 import random
 import socket
 import struct
+import threading
+import time
 
 
 class FakeSwitch(object):
@@ -186,12 +188,31 @@ def by_duplicated_dpid(host, port, count):
         sw.close()
 
 
-def by_register_dos(host, port, number):
-    while 1:
-        switches = []
-        for _ in range(number):
-            sw = FakeSwitch(host, port)
-            sw.register()
-            switches.append(sw)
-        for sw in switches:
-            sw.close()
+def by_register_and_hold(host, port, number):
+    threads = []
+    active = True
+
+    def run():
+        sw = FakeSwitch(host, port)
+        sw.register()
+
+        while active:
+            sw.proc_step()
+
+        sw.close()
+
+    for _ in range(number):
+        th = threading.Thread(target=run)
+        th.setDaemon(True)
+        th.start()
+        threads.append(th)
+
+    try:
+        while 1:
+            time.sleep(1)
+    except:
+        print('joining threads...')
+
+    active = False
+    for th in threads:
+        th.join()
