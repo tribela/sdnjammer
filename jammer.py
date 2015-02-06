@@ -196,9 +196,13 @@ def by_register_and_hold(host, port, number):
     def run():
         sw = FakeSwitch(host, port)
         sw.register()
+        sw.sock.settimeout(1.0)
 
         while active:
-            sw.proc_step()
+            try:
+                sw.proc_step()
+            except socket.timeout:
+                pass
 
         sw.close()
 
