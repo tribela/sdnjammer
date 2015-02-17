@@ -180,10 +180,13 @@ def by_duplicated_dpid(host, port, count):
     switches = []
     for i in range(count):
         dpid = i + 1
-        sw = FakeSwitch(host, port, dpid=dpid)
-        sw.connect()
-        sw.register()
-        switches.append(sw)
+        try:
+            sw = FakeSwitch(host, port, dpid=dpid)
+            sw.connect()
+            sw.register()
+            switches.append(sw)
+        except Exception as e:
+            print(e)
 
     for sw in switches:
         sw.close()
